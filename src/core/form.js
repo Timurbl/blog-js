@@ -1,3 +1,5 @@
+import {Validators} from './validators'
+
 export class Form {
   constructor(form, controls) {
     this.form = form;
@@ -21,12 +23,16 @@ export class Form {
       const validators = this.controls[control];
 
       let isValid = true;
+      let invalid = [];
       validators.forEach(validator => {
-        isValid = validator(this.form[control].value) && isValid
+        isValid = validator(this.form[control].value) && isValid;
+        if (!isValid) {
+          invalid.push(validator)
+        }
       });
 
       if (!isValid) {
-        setError(this.form[control])
+        setError(this.form[control], invalid[0])
       } else {
         clearError(this.form[control])
       }
@@ -45,9 +51,11 @@ export class Form {
   }
 }
 
-function setError($control) {
+function setError($control, param) {
   clearError($control);
-  const error = `<p class="validation-error">Введите корректное значение</p>`;
+  let error = param === Validators.required
+    ? `<p class="validation-error">Введите значение</p>`
+    : `<p class="validation-error">Введите не менее 15 символов</p>`;
   $control.classList.add('invalid');
   $control.insertAdjacentHTML('afterend', error)
 }
